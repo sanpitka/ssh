@@ -40,15 +40,17 @@ class SpreadSheet:
                 try:
                     # Evaluate arithmetic expressions
                     expression = value[1:]
-                    # Check if all parts of the expression are valid integers or operators
-                    if all(part.strip().replace('.', '', 1).isdigit() or part.strip() in {'+', '-', '*', '/'} for part in expression.replace('+', ' + ').replace('-', ' - ').replace('*', ' * ').replace('/', ' / ').split()):
-                        result = eval(expression)
-                        if isinstance(result, int):
-                            return result
-                        else:
-                            return "#Error"
-                    else:
-                        return "#Error"
+                    # Replace cell references in the expression with their evaluated results
+                    for part in self._cells:
+                        if part in expression:
+                            evaluated_value = self.evaluate(part, visited)
+                            if isinstance(evaluated_value, str) and evaluated_value.startswith("#"):
+                                return evaluated_value
+                            expression = expression.replace(part, str(evaluated_value))
+                    # Evaluate the expression using eval
+                    result = eval(expression)
+                    if isinstance(result, int):
+                        return result
                 except:
                     return "#Error"
         return "#Error"

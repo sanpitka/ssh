@@ -76,3 +76,21 @@ class TestSpreadSheet(TestCase):
         spreadsheet = SpreadSheet()
         spreadsheet.set("A1", "=1+3*2")
         self.assertEqual(7, spreadsheet.evaluate("A1"))
+
+    def test_evaluate_valid_formulas_with_arithmetic_operators_and_references(self):
+        spreadsheet = SpreadSheet()
+        spreadsheet.set("A1", "=1+B1")
+        spreadsheet.set("B1", "3")
+        self.assertEqual(4, spreadsheet.evaluate("A1"))
+
+    def test_evaluate_invalid_formulas_with_arithmetic_operators_and_references(self):
+        spreadsheet = SpreadSheet()
+        spreadsheet.set("A1", "=1+B1")
+        spreadsheet.set("B1", "3.1")
+        self.assertEqual("#Error", spreadsheet.evaluate("A1"))
+
+    def test_evaluate_invalid_arithmetic_operation_with_arithmetic_operators_2(self):
+        spreadsheet = SpreadSheet()
+        spreadsheet.set("A1", "=1+B1")
+        spreadsheet.set("B1", "=A1")
+        self.assertEqual("#Circular", spreadsheet.evaluate("A1"))
