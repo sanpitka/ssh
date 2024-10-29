@@ -30,7 +30,6 @@ class SpreadSheet:
             elif value[1:].startswith("'") and value[1:].endswith("'"):
                 return value[2:-1]
             elif value[1:].isidentifier():
-                # Handle cell reference after "="
                 referenced_cell = value[1:]
                 if referenced_cell in self._cells:
                     result = self.evaluate(referenced_cell, visited)
@@ -38,19 +37,23 @@ class SpreadSheet:
                     return result
             else:
                 try:
-                    # Evaluate arithmetic expressions
-                    expression = value[1:]
+                    # Evaluate the expression safely
+                    expression = value[1:].replace('&', '+')
+                    if '/' in expression:
+                        # Check for division by zero
+                        if '/0' in expression:
+                            return "#Error"
                     # Replace cell references in the expression with their evaluated results
-                    for part in self._cells:
-                        if part in expression:
-                            evaluated_value = self.evaluate(part, visited)
-                            if isinstance(evaluated_value, str) and evaluated_value.startswith("#"):
-                                return evaluated_value
-                            expression = expression.replace(part, str(evaluated_value))
-                    # Evaluate the expression using eval
-                    result = eval(expression)
-                    if isinstance(result, int):
-                        return result
+                    for ref_cell in self._cells:
+                        if ref_cell in expression:
+                            ref_value = self.evaluate(ref_cell, visited)
+                            if isinstance(ref_value, str) and ref_value.startswith("#"):
+                                return ref_value
+                            expression = expression.replace(ref_cell, str(ref_value))
+                    result = eval(expression, {"__builtins__": None}, {})
+                    if isinstance(result, float) and not result.is_integer():
+                        return "#Error"
+                    return int(result)
                 except:
                     return "#Error"
         return "#Error"
