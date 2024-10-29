@@ -10,7 +10,15 @@ class SpreadSheet:
     def get(self, cell: str) -> str:
         return self._cells.get(cell, '')
 
-    def evaluate(self, cell: str) -> int | str:
+    def evaluate(self, cell: str, visited=None) -> int | str:
+        if visited is None:
+            visited = set()
+
+        if cell in visited:
+            return "#Circular"
+
+        visited.add(cell)
+
         value = self.get(cell)
         if value.isdigit():
             return int(value)
@@ -19,7 +27,14 @@ class SpreadSheet:
         elif value.startswith("="):
             if value[1:].isdigit():
                 return int(value[1:])
-            elif value[1:].startswith("'") and value.endswith("'"):
+            elif value[1:].startswith("'") and value[1:].endswith("'"):
                 return value[2:-1]
+            else:
+                # Handle cell reference after "="
+                referenced_cell = value[1:]
+                if referenced_cell in self._cells:
+                    result = self.evaluate(referenced_cell, visited)
+                    visited.remove(cell)
+                    return result
         return "#Error"
 
