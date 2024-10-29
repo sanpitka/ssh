@@ -56,3 +56,23 @@ class TestSpreadSheet(TestCase):
         spreadsheet.set("A1", "=B1")
         spreadsheet.set("B1", "=A1")
         self.assertEqual("#Circular", spreadsheet.evaluate("A1"))
+
+    def test_evaluate_valid_arithmetic_operation_with_integers(self):
+        spreadsheet = SpreadSheet()
+        spreadsheet.set("A1", "=1+3")
+        self.assertEqual(4, spreadsheet.evaluate("A1"))
+
+    def test_evaluate_invalid_arithmetic_operation_with_integers(self):
+        spreadsheet = SpreadSheet()
+        spreadsheet.set("A1", "=1+3.5")
+        self.assertEqual("#Error", spreadsheet.evaluate("A1"))
+
+    def test_evaluate_invalid_arithmetic_operation_with_integers_2(self):
+        spreadsheet = SpreadSheet()
+        spreadsheet.set("A1", "=1/0")
+        self.assertEqual("#Error", spreadsheet.evaluate("A1"))
+
+    def test_evaluate_valid_arithmetic_operation_with_integers_2(self):
+        spreadsheet = SpreadSheet()
+        spreadsheet.set("A1", "=1+3*2")
+        self.assertEqual(7, spreadsheet.evaluate("A1"))

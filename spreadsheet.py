@@ -29,12 +29,27 @@ class SpreadSheet:
                 return int(value[1:])
             elif value[1:].startswith("'") and value[1:].endswith("'"):
                 return value[2:-1]
-            else:
+            elif value[1:].isidentifier():
                 # Handle cell reference after "="
                 referenced_cell = value[1:]
                 if referenced_cell in self._cells:
                     result = self.evaluate(referenced_cell, visited)
                     visited.remove(cell)
                     return result
+            else:
+                try:
+                    # Evaluate arithmetic expressions
+                    expression = value[1:]
+                    # Check if all parts of the expression are valid integers or operators
+                    if all(part.strip().replace('.', '', 1).isdigit() or part.strip() in {'+', '-', '*', '/'} for part in expression.replace('+', ' + ').replace('-', ' - ').replace('*', ' * ').replace('/', ' / ').split()):
+                        result = eval(expression)
+                        if isinstance(result, int):
+                            return result
+                        else:
+                            return "#Error"
+                    else:
+                        return "#Error"
+                except:
+                    return "#Error"
         return "#Error"
 
